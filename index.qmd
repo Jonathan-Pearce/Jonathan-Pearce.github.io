@@ -1,0 +1,27 @@
+---
+title: "Jonathan Pearce"
+about:
+  template: trestles
+  links:
+    - text: GitHub
+      icon: github
+      url: "https://github.com/Jonathan-Pearce"
+    - text: Email
+      url: "mailto:pearce.j.jonathan@gmail.com"
+comments: false
+---
+::: {.column-page}
+
+## Bio
+
+Test Bio.
+
+<p></p>
+
+## Selected Projects
+
+#### R/Python Packages
+
+**[calibration](https://github.com/Jonathan-Pearce/calibration_library)** | Calibration Library | 2025  
+
+:::
