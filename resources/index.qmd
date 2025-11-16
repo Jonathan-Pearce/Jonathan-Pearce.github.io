@@ -1,0 +1,12 @@
+---
+title: "Resources"
+---
+
+# Resources
+
+A curated list of papers, tutorials, datasets, and tools useful for causal inference and data science.
+
+- Papers
+- Tutorials
+- Datasets
+- Tools & libraries

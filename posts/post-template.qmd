@@ -1,0 +1,14 @@
+---
+title: "Post Title"
+date: 2025-11-16
+author: "Jonathan Pearce"
+tags: [blog]
+summary: "A one-sentence summary of the post used as an excerpt on listing pages."
+draft: true
+---
+
+Write a short summary or lede here.
+
+## Intro
+
+Start writing your post here. Replace this template content with your own.

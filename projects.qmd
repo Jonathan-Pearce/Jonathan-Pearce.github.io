@@ -1,0 +1,15 @@
+---
+title: "Projects"
+---
+
+# Projects
+
+Below are a few sample projects. Replace these with your own projects and links.
+
+## Project One
+
+- Short description, tech stack, links.
+
+## Project Two
+
+- Short description, tech stack, links.
