@@ -1,23 +1,149 @@
 [
   {
+    "objectID": "resources.html",
+    "href": "resources.html",
+    "title": "Resources",
+    "section": "",
+    "text": "Resources\nA curated list of papers, tutorials, datasets, and tools useful for causal inference and data science.\n\nPapers\nTutorials\nDatasets\nTools & libraries"
+  },
+  {
+    "objectID": "about/index.html",
+    "href": "about/index.html",
+    "title": "About",
+    "section": "",
+    "text": "About\nWrite a short bio here (research interests, current role, contact).\n\nEmail: your.email@example.com\nLocation: City, Country"
+  },
+  {
+    "objectID": "about.html",
+    "href": "about.html",
+    "title": "About",
+    "section": "",
+    "text": "About\nWrite a short bio here (research interests, current role, contact).\n\nEmail: your.email@example.com\nLocation: City, Country"
+  },
+  {
+    "objectID": "resources/index.html",
+    "href": "resources/index.html",
+    "title": "Resources",
+    "section": "",
+    "text": "Resources\nA curated list of papers, tutorials, datasets, and tools useful for causal inference and data science.\n\nPapers\nTutorials\nDatasets\nTools & libraries"
+  },
+  {
+    "objectID": "posts/2025-11-16-welcome.html",
+    "href": "posts/2025-11-16-welcome.html",
+    "title": "Welcome to Casual Inference",
+    "section": "",
+    "text": "Welcome to the Casual Inference blog. This post is a placeholder — replace it with your first post."
+  },
+  {
+    "objectID": "projects/project-template.html",
+    "href": "projects/project-template.html",
+    "title": "Project Title",
+    "section": "",
+    "text": "Short summary of the project.\n\n\nDetailed description, goals, and outcomes.\n\n\n\n\nLanguage / tools\n\n\n\n\n\nSource: https://github.com/username/repo\nDemo: https://example.com"
+  },
+  {
+    "objectID": "projects/project-template.html#description",
+    "href": "projects/project-template.html#description",
+    "title": "Project Title",
+    "section": "",
+    "text": "Detailed description, goals, and outcomes."
+  },
+  {
+    "objectID": "projects/project-template.html#tech",
+    "href": "projects/project-template.html#tech",
+    "title": "Project Title",
+    "section": "",
+    "text": "Language / tools"
+  },
+  {
+    "objectID": "projects/project-template.html#links",
+    "href": "projects/project-template.html#links",
+    "title": "Project Title",
+    "section": "",
+    "text": "Source: https://github.com/username/repo\nDemo: https://example.com"
+  },
+  {
+    "objectID": "projects/index.html",
+    "href": "projects/index.html",
+    "title": "Projects",
+    "section": "",
+    "text": "Below are a few sample projects. Replace these with your own projects and links.\n\n\n\nShort description, tech stack, links.\n\n\n\n\n\nShort description, tech stack, links.\n\n\n\n\n\nUse the template projects/project-template.qmd as a starting point for new project pages."
+  },
+  {
+    "objectID": "projects/index.html#project-one",
+    "href": "projects/index.html#project-one",
+    "title": "Projects",
+    "section": "",
+    "text": "Short description, tech stack, links."
+  },
+  {
+    "objectID": "projects/index.html#project-two",
+    "href": "projects/index.html#project-two",
+    "title": "Projects",
+    "section": "",
+    "text": "Short description, tech stack, links."
+  },
+  {
+    "objectID": "projects/index.html#new-project-template",
+    "href": "projects/index.html#new-project-template",
+    "title": "Projects",
+    "section": "",
+    "text": "Use the template projects/project-template.qmd as a starting point for new project pages."
+  },
+  {
     "objectID": "index.html",
     "href": "index.html",
-    "title": "Jonathan Pearce",
+    "title": "Casual Inference",
     "section": "",
-    "text": "Test Bio.\n\n\n\n\n\n\n\ncalibration | Calibration Library | 2025"
+    "text": "Hello — I’m Jonathan Pearce. I work on causal inference, applied statistics, and reproducible data science. This site contains my projects, blog posts, and useful resources.\n\n\nGitHub: @Jonathan-Pearce\nLinkedIn: LinkedIn profile\n\n\n\n\nProject A — short description. See the Projects tab.\n\n\n\n\n\nWelcome to Casual Inference"
   },
   {
-    "objectID": "index.html#bio",
-    "href": "index.html#bio",
-    "title": "Jonathan Pearce",
+    "objectID": "index.html#featured-projects",
+    "href": "index.html#featured-projects",
+    "title": "Casual Inference",
     "section": "",
-    "text": "Test Bio."
+    "text": "Project A — short description. See the Projects tab."
   },
   {
-    "objectID": "index.html#selected-projects",
-    "href": "index.html#selected-projects",
-    "title": "Jonathan Pearce",
+    "objectID": "index.html#latest-posts",
+    "href": "index.html#latest-posts",
+    "title": "Casual Inference",
     "section": "",
-    "text": "calibration | Calibration Library | 2025"
+    "text": "Welcome to Casual Inference"
+  },
+  {
+    "objectID": "blog.html",
+    "href": "blog.html",
+    "title": "Blog",
+    "section": "",
+    "text": "Blog\nWelcome to the blog. Below are posts and drafts.\n\nWelcome to Casual Inference"
+  },
+  {
+    "objectID": "blog/index.html",
+    "href": "blog/index.html",
+    "title": "Blog",
+    "section": "",
+    "text": "title: “Blog” listing: contents: posts — title: “Blog” listing: contents: posts sort: by: date order: desc format: cards excerpt: true —\n# Blog\n\nThis page lists posts from the `posts/` directory automatically. Each post will show its `summary` field as an excerpt when available.\n\n&lt;!-- Quarto will generate the list using the `listing` configuration above. --&gt;"
+  },
+  {
+    "objectID": "projects.html",
+    "href": "projects.html",
+    "title": "Projects",
+    "section": "",
+    "text": "Below are a few sample projects. Replace these with your own projects and links.\n\n\n\nShort description, tech stack, links.\n\n\n\n\n\nShort description, tech stack, links."
+  },
+  {
+    "objectID": "projects.html#project-one",
+    "href": "projects.html#project-one",
+    "title": "Projects",
+    "section": "",
+    "text": "Short description, tech stack, links."
+  },
+  {
+    "objectID": "projects.html#project-two",
+    "href": "projects.html#project-two",
+    "title": "Projects",
+    "section": "",
+    "text": "Short description, tech stack, links."
   }
 ]
