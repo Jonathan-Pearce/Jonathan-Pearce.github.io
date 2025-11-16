@@ -1,0 +1,21 @@
+---
+title: "Projects"
+---
+
+# Projects
+
+Below are a few sample projects. Replace these with your own projects and links.
+
+## Project One
+
+- Short description, tech stack, links.
+
+## Project Two
+
+- Short description, tech stack, links.
+
+---
+
+## New Project Template
+
+Use the template `projects/project-template.qmd` as a starting point for new project pages.

@@ -1,0 +1,7 @@
+---
+title: "Welcome to Casual Inference"
+date: 2025-11-16
+summary: "Introductory post — welcome to the Casual Inference blog and site."
+---
+
+Welcome to the Casual Inference blog. This post is a placeholder — replace it with your first post.

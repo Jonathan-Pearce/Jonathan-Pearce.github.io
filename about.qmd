@@ -1,0 +1,10 @@
+---
+title: "About"
+---
+
+# About
+
+Write a short bio here (research interests, current role, contact).
+
+- Email: your.email@example.com
+- Location: City, Country
