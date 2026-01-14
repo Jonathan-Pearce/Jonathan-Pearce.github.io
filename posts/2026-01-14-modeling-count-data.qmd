@@ -1,5 +1,5 @@
 ---
-title: "Modelling Count Data: Poisson, Quasi-Poisson, and Negative Binomial Regression"
+title: "Modeling Count Data: Poisson, Quasi-Poisson, and Negative Binomial Regression"
 date: 2026-01-14
 author: "Jonathan Pearce"
 tags: [statistics, regression, R, count-data]
