@@ -1,0 +1,25 @@
+---
+title: "Projects"
+listing:
+  contents: "*/index.qmd"
+  type: grid
+  grid-columns: 2
+  sort: "date desc"
+  categories: true
+  sort-ui: true
+  filter-ui: true
+  page-size: 12
+  fields: [image, date, title, description, categories]
+---
+
+A collection of projects, datasets, and tools.
+
+<!--
+  FORMATTING RECOMMENDATIONS
+  ─────────────────────────────────────────────
+  • Grid layout shows thumbnail cards; switch to type: default
+    for a more compact list view.
+  • Each project lives in its own folder: projects/<slug>/index.qmd.
+  • Use categories for tagging (e.g., "Dataset", "ML", "Tool").
+  • filter-ui and sort-ui let visitors search and reorder.
+-->

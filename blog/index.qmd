@@ -1,0 +1,26 @@
+---
+title: "Blog"
+listing:
+  contents: posts/*/index.qmd
+  type: default
+  sort: "date desc"
+  categories: true
+  sort-ui: true
+  filter-ui: true
+  feed: true
+  page-size: 10
+  fields: [image, date, title, description, categories, reading-time]
+---
+
+Browse posts by category using the sidebar, or search and filter below.
+
+<!--
+  FORMATTING RECOMMENDATIONS
+  ─────────────────────────────────────────────
+  • Quarto's built-in listing handles pagination (page-size),
+    category filtering (categories: true), and sort/filter controls.
+  • Each post lives in its own folder under blog/posts/<slug>/index.qmd.
+    Add a thumbnail by including an image field in the post YAML.
+  • For many posts, increase page-size or switch type to "grid" for
+    a more visual layout.
+-->
