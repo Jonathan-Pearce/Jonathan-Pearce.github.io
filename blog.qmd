@@ -1,9 +1,0 @@
----
-title: "Blog"
----
-
-# Blog
-
-Welcome to the blog. Below are posts and drafts.
-
-- [Welcome to Casual Inference](posts/2025-11-16-welcome.qmd)
