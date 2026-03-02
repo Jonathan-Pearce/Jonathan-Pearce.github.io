@@ -1,0 +1,136 @@
+---
+title: "Blog Post Template"
+description: "A starter template showing the Quarto features most useful for data analytics and ML blog posts."
+author: "Jonathan Pearce"
+date: "2026-01-01"
+categories: [Template, Tutorial]
+image: thumbnail.png
+draft: true
+toc: true
+code-fold: true
+code-tools: true
+code-copy: true
+number-sections: true
+fig-cap-location: bottom
+execute:
+  echo: true
+  warning: false
+---
+
+<!-- 
+  HOW TO USE THIS TEMPLATE
+  ════════════════════════════════════════════════════
+  1. Copy this folder (blog/posts/template-post/) and rename it to your post slug.
+  2. Rename or replace thumbnail.png with your own image.
+  3. Update the YAML front-matter above (title, description, date, categories, etc.).
+  4. Set draft: false when you are ready to publish.
+  5. Write your post below using the features demonstrated here.
+-->
+
+## Introduction
+
+Start with a brief overview of the problem or topic.
+Use **bold** and *italic* for emphasis, and [links](https://quarto.org) where needed.
+
+::: {.callout-note}
+## Key Takeaway
+Callout boxes are great for highlighting important points.
+Other types: `.callout-warning`, `.callout-tip`, `.callout-important`.
+:::
+
+## Data & Setup
+
+```{python}
+#| label: setup
+#| code-summary: "Import libraries"
+
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+
+np.random.seed(42)
+```
+
+## Analysis
+
+### Generating Sample Data
+
+```{python}
+#| label: fig-scatter
+#| fig-cap: "Scatter plot of two correlated variables."
+
+x = np.random.normal(0, 1, 200)
+y = 0.8 * x + np.random.normal(0, 0.5, 200)
+
+plt.figure(figsize=(6, 4))
+plt.scatter(x, y, alpha=0.6, edgecolors="k", linewidth=0.5)
+plt.xlabel("Feature X")
+plt.ylabel("Target Y")
+plt.title("Sample Scatter Plot")
+plt.tight_layout()
+plt.show()
+```
+
+### Summary Statistics
+
+```{python}
+#| label: tbl-summary
+#| tbl-cap: "Summary statistics for the sample data."
+
+df = pd.DataFrame({"x": x, "y": y})
+df.describe().round(2)
+```
+
+### Tabsets for Comparisons
+
+::: {.panel-tabset}
+
+#### Model A
+
+```{python}
+from numpy.polynomial import polynomial as P
+
+coeffs = np.polyfit(x, y, 1)
+print(f"Linear fit: y = {coeffs[0]:.3f}x + {coeffs[1]:.3f}")
+```
+
+#### Model B
+
+```{python}
+coeffs2 = np.polyfit(x, y, 2)
+print(f"Quadratic fit: y = {coeffs2[0]:.3f}x² + {coeffs2[1]:.3f}x + {coeffs2[2]:.3f}")
+```
+
+:::
+
+## Mathematical Notation
+
+Inline math: $\hat{y} = \beta_0 + \beta_1 x$
+
+Display math:
+
+$$
+\mathcal{L}(\theta) = -\frac{1}{N}\sum_{i=1}^{N}\left[y_i \log \hat{y}_i + (1 - y_i)\log(1 - \hat{y}_i)\right]
+$$
+
+## Diagrams with Mermaid
+
+```{mermaid}
+flowchart LR
+    A[Raw Data] --> B[Clean & Transform]
+    B --> C[Feature Engineering]
+    C --> D[Model Training]
+    D --> E[Evaluation]
+    E --> F{Good enough?}
+    F -- Yes --> G[Deploy]
+    F -- No --> C
+```
+
+## Conclusion
+
+Summarise findings and next steps here.
+
+## References
+
+::: {#refs}
+:::

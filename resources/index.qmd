@@ -1,0 +1,78 @@
+---
+title: "Resources"
+toc: true
+toc-depth: 2
+---
+
+A curated collection of learning resources organised by topic.
+Use the table of contents on the right to jump between sections.
+
+<!--
+  FORMATTING RECOMMENDATIONS
+  ─────────────────────────────────────────────
+  • Use H2 headings for each major category and H3 for sub-categories.
+    The right-hand TOC (toc-depth: 2) lets readers jump to any section.
+  • For very long resource lists consider:
+    – Collapsible sections (use Quarto's ::: {.callout-tip collapse="true"})
+    – Separate sub-pages linked from this index
+    – Tabsets for closely related topics (shown below)
+  • Keep descriptions short (one or two sentences per link).
+-->
+
+## Large Language Models (LLMs)
+
+| Resource | Description |
+|----------|-------------|
+| [Andrej Karpathy – Neural Networks: Zero to Hero](https://karpathy.ai/zero-to-hero.html) | Video lecture series building neural nets from scratch |
+| [Hugging Face Course](https://huggingface.co/course) | Free NLP course using the Transformers library |
+
+: {.striped .hover}
+
+## Machine Learning
+
+::: {.panel-tabset}
+
+### Courses
+
+- [fast.ai](https://www.fast.ai/) — Practical deep learning for coders
+- [Stanford CS229](https://cs229.stanford.edu/) — Machine Learning
+
+### Books
+
+- *An Introduction to Statistical Learning* — James, Witten, Hastie, Tibshirani
+- *Hands-On Machine Learning* — Aurélien Géron
+
+### Tools & Libraries
+
+- [scikit-learn](https://scikit-learn.org/)
+- [PyTorch](https://pytorch.org/)
+- [XGBoost](https://xgboost.readthedocs.io/)
+
+:::
+
+## Statistics
+
+::: {.callout-tip collapse="true"}
+## Bayesian Statistics
+
+- *Statistical Rethinking* — Richard McElreath
+- [Bayesian Methods for Hackers](https://camdavidsonpilon.github.io/Probabilistic-Programming-and-Bayesian-Methods-for-Hackers/)
+:::
+
+::: {.callout-tip collapse="true"}
+## Causal Inference
+
+- *Causal Inference: The Mixtape* — Scott Cunningham
+- *The Effect* — Nick Huntington-Klein
+:::
+
+## Data Engineering
+
+- [The Data Engineering Handbook](https://github.com/DataEngineer-io/data-engineer-handbook)
+- [Apache Spark Documentation](https://spark.apache.org/docs/latest/)
+
+## Favourite Books
+
+- *Thinking, Fast and Slow* — Daniel Kahneman
+- *The Book of Why* — Judea Pearl
+- *Noise* — Daniel Kahneman, Olivier Sibony, Cass Sunstein

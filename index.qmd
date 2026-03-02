@@ -1,0 +1,48 @@
+---
+title: "Casual Inference"
+toc: false
+listing:
+  - id: recent-blog
+    contents: blog/posts/*/index.qmd
+    type: grid
+    grid-columns: 3
+    sort: "date desc"
+    max-items: 3
+    fields: [image, date, title, description, categories]
+  - id: recent-projects
+    contents: projects/*/index.qmd
+    type: grid
+    grid-columns: 3
+    sort: "date desc"
+    max-items: 3
+    fields: [image, date, title, description, categories]
+---
+
+::: {.hero-section}
+
+![](images/profile-placeholder.png){.profile-photo fig-alt="Photo of Jonathan Pearce"}
+
+# Welcome to Casual Inference
+
+A personal site for sharing projects, blog posts, datasets, and resources on **data analytics**, **machine learning**, and **statistics**.
+
+[GitHub](https://github.com/Jonathan-Pearce){.btn .btn-outline-dark .btn-sm}
+[LinkedIn](https://www.linkedin.com/in/jonathan-pearce){.btn .btn-outline-dark .btn-sm}
+
+:::
+
+---
+
+## Recent Blog Posts
+
+:::{#recent-blog}
+:::
+
+[See all posts →](blog/index.qmd)
+
+## Recent Projects
+
+:::{#recent-projects}
+:::
+
+[See all projects →](projects/index.qmd)
