@@ -1,0 +1,278 @@
+---
+title: "Modeling Count Data: Poisson, Quasi-Poisson, and Negative Binomial Regression"
+date: 2026-01-14
+author: "Jonathan Pearce"
+tags: [statistics, regression, R, count-data]
+summary: "A simulation study comparing Poisson regression with robust standard errors, quasi-Poisson, and negative binomial models, highlighting Wooldridge's recommendations."
+draft: false
+format:
+  html:
+    code-fold: false
+    code-tools: true
+---
+
+## Introduction
+
+Count data—non-negative integer outcomes such as the number of patents filed, hospital visits, or accidents per year—are ubiquitous in empirical research. While Poisson regression is the natural starting point for modeling count data, practitioners often face questions about overdispersion and which modeling approach to use: Poisson with robust standard errors, quasi-Poisson, or negative binomial regression.
+
+In this article, we'll explore these modeling approaches through simulation, drawing on recommendations from Professor Jeffrey Wooldridge's influential work on count data models. The key insight: **Poisson regression with robust standard errors is often the most reliable choice**, even when the data exhibit overdispersion.
+
+## The Count Data Models
+
+### Poisson Regression
+
+The Poisson model assumes that the expected count $E(y|x) = \exp(x'\beta)$ and that the variance equals the mean: $Var(y|x) = E(y|x)$. This equidispersion assumption is often violated in practice, leading to overdispersion where $Var(y|x) > E(y|x)$.
+
+### Quasi-Poisson and Robust Standard Errors
+
+When overdispersion is present, standard Poisson standard errors underestimate the true sampling variability. Two solutions exist:
+
+1. **Robust (sandwich) standard errors**: Correct the standard errors without changing the coefficient estimates
+2. **Quasi-Poisson**: Estimates a dispersion parameter to scale the variance
+
+Both approaches yield consistent coefficient estimates under correct specification of the conditional mean.
+
+### Negative Binomial Regression
+
+The negative binomial model explicitly models overdispersion by adding a gamma-distributed random effect. While this seems appealing, Wooldridge (1999, 2010) notes that negative binomial regression requires stronger assumptions and can be less efficient than Poisson with robust standard errors when these assumptions don't hold.
+
+## Simulation Study
+
+Let's compare these approaches through simulation. We'll generate overdispersed count data and evaluate each method's performance.
+
+```{r setup, message=FALSE, warning=FALSE}
+library(MASS)        # for negative binomial
+library(sandwich)    # for robust standard errors
+library(lmtest)      # for coefficient tests
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+
+set.seed(42)
+```
+
+### Data Generation
+
+We'll simulate count data with overdispersion using a negative binomial data generating process:
+
+```{r simulate-data}
+# Function to generate overdispersed count data
+generate_count_data <- function(n = 500, beta0 = 0.5, beta1 = 0.8, 
+                                beta2 = -0.3, theta = 2) {
+  x1 <- rnorm(n)
+  x2 <- rnorm(n)
+  
+  # Linear predictor
+  mu <- exp(beta0 + beta1 * x1 + beta2 * x2)
+  
+  # Generate negative binomial counts (overdispersed)
+  y <- rnbinom(n, mu = mu, size = theta)
+  
+  data.frame(y = y, x1 = x1, x2 = x2)
+}
+
+# Generate a sample dataset
+df <- generate_count_data(n = 500)
+
+# Check for overdispersion
+cat("Mean of y:", mean(df$y), "\n")
+cat("Variance of y:", var(df$y), "\n")
+cat("Variance/Mean ratio:", var(df$y) / mean(df$y), "\n")
+```
+
+The variance-to-mean ratio greater than 1 confirms overdispersion.
+
+### Fitting Different Models
+
+```{r fit-models}
+# 1. Standard Poisson
+poisson_model <- glm(y ~ x1 + x2, data = df, family = poisson())
+
+# 2. Poisson with robust standard errors
+poisson_robust <- coeftest(poisson_model, vcov = vcovHC(poisson_model, type = "HC0"))
+
+# 3. Quasi-Poisson
+quasi_poisson <- glm(y ~ x1 + x2, data = df, family = quasipoisson())
+
+# 4. Negative Binomial
+nb_model <- glm.nb(y ~ x1 + x2, data = df)
+
+# Compare coefficient estimates
+coef_comparison <- data.frame(
+  Method = c("Poisson", "Quasi-Poisson", "Negative Binomial"),
+  beta1 = c(coef(poisson_model)[2], coef(quasi_poisson)[2], coef(nb_model)[2]),
+  beta2 = c(coef(poisson_model)[3], coef(quasi_poisson)[3], coef(nb_model)[3])
+)
+
+print(coef_comparison)
+```
+
+### Standard Error Comparison
+
+```{r compare-se}
+# Extract standard errors
+se_comparison <- data.frame(
+  Method = c("Poisson (naive)", "Poisson (robust)", "Quasi-Poisson", "Negative Binomial"),
+  SE_x1 = c(
+    summary(poisson_model)$coefficients[2, 2],
+    poisson_robust[2, 2],
+    summary(quasi_poisson)$coefficients[2, 2],
+    summary(nb_model)$coefficients[2, 2]
+  ),
+  SE_x2 = c(
+    summary(poisson_model)$coefficients[3, 2],
+    poisson_robust[3, 2],
+    summary(quasi_poisson)$coefficients[3, 2],
+    summary(nb_model)$coefficients[3, 2]
+  )
+)
+
+print(se_comparison)
+```
+
+```{r plot-se-comparison, fig.width=8, fig.height=5}
+# Visualize standard error differences
+se_long <- se_comparison %>%
+  pivot_longer(cols = starts_with("SE_"), 
+               names_to = "Coefficient", 
+               values_to = "Standard_Error") %>%
+  mutate(Coefficient = gsub("SE_", "", Coefficient))
+
+ggplot(se_long, aes(x = Method, y = Standard_Error, fill = Coefficient)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(title = "Standard Error Comparison Across Methods",
+       subtitle = "Notice how naive Poisson underestimates uncertainty",
+       y = "Standard Error", x = "") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        legend.position = "top")
+```
+
+### Bootstrap Standard Errors
+
+For additional robustness, we can compute bootstrapped standard errors:
+
+```{r bootstrap-se, cache=TRUE}
+# Bootstrap function
+boot_poisson <- function(data, indices) {
+  d <- data[indices, ]
+  fit <- glm(y ~ x1 + x2, data = d, family = poisson())
+  coef(fit)
+}
+
+# Perform bootstrap (500 replicates for speed)
+library(boot)
+boot_results <- boot(data = df, statistic = boot_poisson, R = 500)
+
+# Bootstrap standard errors
+boot_se <- apply(boot_results$t, 2, sd)
+names(boot_se) <- c("Intercept", "x1", "x2")
+
+cat("Bootstrap Standard Errors:\n")
+print(boot_se[2:3])
+```
+
+### Monte Carlo Simulation
+
+To assess coverage properties, let's run a Monte Carlo simulation:
+
+```{r monte-carlo, cache=TRUE}
+n_sim <- 1000
+true_beta1 <- 0.8
+true_beta2 <- -0.3
+
+# Storage for results
+results <- matrix(NA, nrow = n_sim, ncol = 8)
+colnames(results) <- c("pois_beta1", "pois_se", "robust_se", "quasi_se", 
+                       "pois_beta2", "pois_se2", "robust_se2", "quasi_se2")
+
+for (i in 1:n_sim) {
+  # Generate data
+  sim_data <- generate_count_data(n = 300)
+  
+  # Fit models
+  pois_fit <- glm(y ~ x1 + x2, data = sim_data, family = poisson())
+  quasi_fit <- glm(y ~ x1 + x2, data = sim_data, family = quasipoisson())
+  robust_test <- coeftest(pois_fit, vcov = vcovHC(pois_fit, type = "HC0"))
+  
+  # Store results for x1
+  results[i, "pois_beta1"] <- coef(pois_fit)[2]
+  results[i, "pois_se"] <- summary(pois_fit)$coefficients[2, 2]
+  results[i, "robust_se"] <- robust_test[2, 2]
+  results[i, "quasi_se"] <- summary(quasi_fit)$coefficients[2, 2]
+  
+  # Store results for x2
+  results[i, "pois_beta2"] <- coef(pois_fit)[3]
+  results[i, "pois_se2"] <- summary(pois_fit)$coefficients[3, 2]
+  results[i, "robust_se2"] <- robust_test[3, 2]
+  results[i, "quasi_se2"] <- summary(quasi_fit)$coefficients[3, 2]
+}
+
+# Calculate coverage for x1
+coverage_x1 <- data.frame(
+  Method = c("Poisson (naive)", "Poisson (robust)", "Quasi-Poisson"),
+  Coverage = c(
+    mean(abs(results[, "pois_beta1"] - true_beta1) < 1.96 * results[, "pois_se"]),
+    mean(abs(results[, "pois_beta1"] - true_beta1) < 1.96 * results[, "robust_se"]),
+    mean(abs(results[, "pois_beta1"] - true_beta1) < 1.96 * results[, "quasi_se"])
+  )
+)
+
+print(coverage_x1)
+```
+
+```{r plot-coverage, fig.width=7, fig.height=4}
+ggplot(coverage_x1, aes(x = Method, y = Coverage, fill = Method)) +
+  geom_bar(stat = "identity") +
+  geom_hline(yintercept = 0.95, linetype = "dashed", color = "red") +
+  labs(title = "95% Confidence Interval Coverage",
+       subtitle = "Target coverage: 0.95 (red line)",
+       y = "Empirical Coverage", x = "") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        legend.position = "none") +
+  ylim(0, 1)
+```
+
+## Wooldridge's Recommendations
+
+Based on our simulation and Wooldridge's research (1999, 2010), we can draw several key conclusions:
+
+1. **Coefficient Consistency**: All methods (Poisson, quasi-Poisson, negative binomial) produce consistent coefficient estimates when the conditional mean is correctly specified.
+
+2. **Standard Errors Matter**: Naive Poisson standard errors are severely biased downward under overdispersion, leading to inflated Type I error rates and poor coverage.
+
+3. **Robust SEs Are Sufficient**: Poisson regression with robust (sandwich) standard errors provides valid inference without requiring additional distributional assumptions. This approach is robust to misspecification of the variance structure.
+
+4. **Quasi-Poisson vs. Robust**: Quasi-Poisson and robust standard errors are asymptotically equivalent but may differ in finite samples. Both are valid choices.
+
+5. **Negative Binomial Caution**: While negative binomial regression is popular, it requires the correct specification of the variance function. When this assumption fails, negative binomial can be less efficient than Poisson with robust standard errors.
+
+## Practical Recommendations
+
+For applied researchers working with count data:
+
+- **Start with Poisson regression** and assess overdispersion using a diagnostic test or by examining the variance-to-mean ratio
+- **Always use robust standard errors** when reporting Poisson regression results (or equivalently, use quasi-Poisson)
+- **Consider negative binomial** only if you have strong theoretical reasons to believe in its variance structure
+- **Report multiple specifications** as a robustness check when results are sensitive to modeling choices
+- **Use bootstrap standard errors** as an additional robustness check in small samples
+
+## Conclusion
+
+Count data modeling doesn't have to be complicated. Despite the appeal of more sophisticated models like negative binomial regression, Poisson regression with robust standard errors remains a simple, reliable choice for most applications. As Wooldridge emphasizes, the key is getting the conditional mean right—robust standard errors handle the rest.
+
+## References
+
+- Wooldridge, J. M. (1999). Distribution-free estimation of some nonlinear panel data models. *Journal of Econometrics*, 90(1), 77-97.
+- Wooldridge, J. M. (2010). *Econometric Analysis of Cross Section and Panel Data* (2nd ed.). MIT Press.
+- Cameron, A. C., & Trivedi, P. K. (2013). *Regression Analysis of Count Data* (2nd ed.). Cambridge University Press.
+- Stack Exchange Discussion: [When to use negative binomial and Poisson regression](https://stats.stackexchange.com/questions/653727/when-to-use-negative-binomial-and-poisson-regression)
+
+## Code Availability
+
+All code used in this analysis is available in the article source. The simulation can be reproduced by running the code chunks in sequence.
+
+---
+
+*This article was created using Quarto and R. For questions or suggestions, please reach out via [GitHub](https://github.com/Jonathan-Pearce).*
