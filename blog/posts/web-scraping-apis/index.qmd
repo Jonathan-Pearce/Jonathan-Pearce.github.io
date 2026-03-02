@@ -1,0 +1,429 @@
+---
+title: "Accelerating Web Scraping with APIs"
+description: "Design patterns and parallelization strategies for Python API scrapers — from a naive loop to async I/O and multi-core execution — plus how to benchmark each step."
+author: "Jonathan Pearce"
+date: "2026-03-02"
+categories: [Python, Web Scraping, Performance, Tutorial]
+image: thumbnail.png
+toc: true
+code-fold: true
+code-tools: true
+code-copy: true
+number-sections: true
+execute:
+  echo: true
+  warning: false
+  eval: false
+---
+
+## Introduction
+
+Public APIs are a goldmine for data collection. Two good examples are VIA Rail's real-time train data
+([`allData.json`](https://tsimobile.viarail.ca/data/allData.json)) and the MaxSold auction item
+catalogue ([`msapi/auctions/items`](https://maxsold.maxsold.com/msapi/auctions/items?auctionid=103293)).
+Both return structured JSON you can consume directly without HTML parsing, making them ideal targets for
+a well-engineered scraper.
+
+This article walks through the full design journey:
+
+1. Start with a **naive synchronous scraper** that is easy to reason about.
+2. Add **async I/O** (`asyncio` + `aiohttp`) to eliminate network idle time.
+3. Layer in **CPU parallelism** (`concurrent.futures`) for CPU-bound post-processing.
+4. **Benchmark** each stage so you know where your bottleneck actually is.
+5. Decide whether to store raw JSON blobs or normalised tabular data.
+
+Approximate read time: 10 minutes. Code is written for Python 3.10+.
+
+---
+
+## Design Considerations Before You Write a Line of Code
+
+### Choose the right libraries
+
+| Concern | Recommended library | Notes |
+|---|---|---|
+| Synchronous HTTP | `requests` | Simple, battle-tested |
+| Async HTTP | `aiohttp` | Pairs with `asyncio`; faster than `httpx` for pure async |
+| Async HTTP (alt) | `httpx` | Drop-in `requests` API with async support |
+| CPU parallelism | `concurrent.futures` | `ProcessPoolExecutor` is stdlib and straightforward |
+| Rate-limit awareness | `tenacity` | Retry with exponential back-off |
+| Data wrangling | `pandas` / `polars` | `polars` is faster for large normalised tables |
+
+### Respect API rate limits
+
+Most free APIs throttle by IP or token. Before looping over thousands of IDs:
+
+- Read the API docs for stated limits (requests/minute, concurrent connections).
+- Add a `Retry-After` header handler so you back off automatically on HTTP 429.
+- Keep a **semaphore** (`asyncio.Semaphore`) to cap your own concurrency — don't rely solely on the server to push back.
+
+### Raw JSON vs. tabular storage
+
+Storing raw JSON gives you a replayable source of truth; you can re-derive any schema without hitting
+the API again. The trade-off is storage and query complexity.
+
+A practical middle ground: **save the raw JSON** alongside a normalised Parquet file. Tools like
+`pandas.json_normalize` and `polars` make the transformation cheap.
+
+---
+
+## Stage 1 — The Naive Synchronous Scraper
+
+Start here. It is easy to debug and gives you a timing baseline.
+
+```{python}
+#| label: naive-scraper
+#| code-summary: "Synchronous scraper (baseline)"
+
+import time
+import requests
+import json
+from pathlib import Path
+
+AUCTION_IDS = [103293, 103294, 103295, 103296, 103297]
+BASE_URL = "https://maxsold.maxsold.com/msapi/auctions/items"
+OUT_DIR = Path("data/raw")
+OUT_DIR.mkdir(parents=True, exist_ok=True)
+
+
+def fetch_auction(auction_id: int) -> dict:
+    """Fetch items for a single auction and return the JSON payload."""
+    resp = requests.get(BASE_URL, params={"auctionid": auction_id}, timeout=10)
+    resp.raise_for_status()
+    return resp.json()
+
+
+def run_naive():
+    start = time.perf_counter()
+
+    results = {}
+    for aid in AUCTION_IDS:
+        results[aid] = fetch_auction(aid)
+        (OUT_DIR / f"{aid}.json").write_text(json.dumps(results[aid]))
+
+    elapsed = time.perf_counter() - start
+    print(f"Naive: fetched {len(AUCTION_IDS)} auctions in {elapsed:.2f}s")
+    return results
+
+
+if __name__ == "__main__":
+    run_naive()
+```
+
+::: {.callout-note}
+`time.perf_counter()` measures **wall-clock time** (real elapsed time). Use `time.process_time()` to
+measure only CPU time consumed by your own process. For I/O-heavy scrapers, wall time is what matters;
+for CPU-heavy post-processing, process time helps isolate computation cost.
+:::
+
+---
+
+## Stage 2 — Async I/O with `asyncio` and `aiohttp`
+
+Network requests spend most of their time waiting. `asyncio` lets a single thread juggle hundreds of
+pending requests by switching tasks while one is waiting for a response.
+
+```{python}
+#| label: async-scraper
+#| code-summary: "Async scraper with semaphore rate-limiting"
+
+import asyncio
+import time
+import aiohttp
+import json
+from pathlib import Path
+
+AUCTION_IDS = [103293, 103294, 103295, 103296, 103297]
+BASE_URL = "https://maxsold.maxsold.com/msapi/auctions/items"
+OUT_DIR = Path("data/raw")
+MAX_CONCURRENT = 5          # tune to stay within API limits
+
+
+async def fetch_auction_async(
+    session: aiohttp.ClientSession,
+    sem: asyncio.Semaphore,
+    auction_id: int,
+) -> tuple[int, dict]:
+    async with sem:            # blocks if MAX_CONCURRENT tasks are already running
+        async with session.get(BASE_URL, params={"auctionid": auction_id}) as resp:
+            resp.raise_for_status()
+            data = await resp.json()
+    return auction_id, data
+
+
+async def run_async():
+    sem = asyncio.Semaphore(MAX_CONCURRENT)
+    start = time.perf_counter()
+
+    async with aiohttp.ClientSession() as session:
+        tasks = [fetch_auction_async(session, sem, aid) for aid in AUCTION_IDS]
+        pairs = await asyncio.gather(*tasks, return_exceptions=False)
+
+    for aid, data in pairs:
+        (OUT_DIR / f"{aid}.json").write_text(json.dumps(data))
+
+    elapsed = time.perf_counter() - start
+    print(f"Async: fetched {len(AUCTION_IDS)} auctions in {elapsed:.2f}s")
+    return dict(pairs)
+
+
+if __name__ == "__main__":
+    asyncio.run(run_async())
+```
+
+**Expected speedup:** roughly linear with the number of concurrent requests, up to the API's connection
+limit. A synchronous scraper that takes 10 s for 10 URLs often completes in ~1–2 s with async — the
+network latency that used to stack up now overlaps.
+
+---
+
+## Stage 3 — CPU Parallelism with `concurrent.futures`
+
+Async I/O solves the *waiting* problem. If your post-processing step (JSON normalisation, deduplication,
+feature engineering) is CPU-intensive, you need actual parallel execution across CPU cores.
+`ProcessPoolExecutor` spawns worker processes, bypassing Python's Global Interpreter Lock (GIL).
+
+```{python}
+#| label: cpu-parallel
+#| code-summary: "CPU-parallel post-processing with ProcessPoolExecutor"
+
+import json
+import time
+from concurrent.futures import ProcessPoolExecutor, as_completed
+from pathlib import Path
+import pandas as pd
+
+RAW_DIR = Path("data/raw")
+OUT_CSV = Path("data/processed/auctions.parquet")
+OUT_CSV.parent.mkdir(parents=True, exist_ok=True)
+
+
+def normalise_file(path: Path) -> pd.DataFrame:
+    """Load one raw JSON file and return a flat DataFrame."""
+    payload = json.loads(path.read_text())
+    # json_normalize handles nested dicts; 'record_path' depends on actual API shape
+    df = pd.json_normalize(payload if isinstance(payload, list) else [payload])
+    df["_source_file"] = path.stem
+    return df
+
+
+def run_parallel_normalise():
+    json_files = list(RAW_DIR.glob("*.json"))
+    start = time.perf_counter()
+
+    frames = []
+    with ProcessPoolExecutor() as executor:
+        futures = {executor.submit(normalise_file, p): p for p in json_files}
+        for future in as_completed(futures):
+            frames.append(future.result())
+
+    combined = pd.concat(frames, ignore_index=True)
+    combined.to_parquet(OUT_CSV)
+
+    elapsed = time.perf_counter() - start
+    print(f"Parallel normalise: {len(json_files)} files in {elapsed:.2f}s")
+    return combined
+
+
+if __name__ == "__main__":
+    run_parallel_normalise()
+```
+
+### Combining async fetch + parallel processing
+
+The two techniques compose naturally: **fetch async, process in parallel**.
+
+```{mermaid}
+flowchart LR
+    A[Auction ID list] -->|asyncio.gather| B[Async HTTP fetches\naiohttp + Semaphore]
+    B -->|raw JSON blobs| C[Disk / memory]
+    C -->|ProcessPoolExecutor| D[CPU workers\nnormalise & clean]
+    D --> E[Parquet / CSV output]
+```
+
+::: {.callout-warning}
+## Avoid mixing async and multiprocessing carelessly
+`ProcessPoolExecutor` spawns separate processes, each with their own event loop. Do not pass
+`aiohttp.ClientSession` objects across process boundaries — they are not picklable. Fetch in async,
+*then* hand raw bytes/dicts to the process pool.
+:::
+
+---
+
+## Measuring Performance
+
+### Wall time vs. CPU time
+
+```{python}
+#| label: timing-example
+#| code-summary: "Comparing wall time and CPU time"
+
+import time
+
+
+def measure(fn, *args, **kwargs):
+    """Run fn and report wall time and CPU time."""
+    t_wall_start = time.perf_counter()
+    t_cpu_start = time.process_time()
+
+    result = fn(*args, **kwargs)
+
+    wall = time.perf_counter() - t_wall_start
+    cpu = time.process_time() - t_cpu_start
+
+    print(f"Wall time : {wall:.3f}s")
+    print(f"CPU time  : {cpu:.3f}s")
+    print(f"I/O ratio : {1 - cpu / wall:.1%} of wall time was I/O wait")
+    return result
+```
+
+A high I/O ratio (> 80 %) means async will help most. A low I/O ratio means CPU parallelism is the
+lever to pull.
+
+### Checking CPU core utilisation
+
+```{python}
+#| label: cpu-check
+#| code-summary: "Monitor CPU utilisation with psutil"
+
+import psutil
+import time
+import threading
+
+
+def monitor_cpu(interval: float = 0.5, duration: float = 10.0):
+    """Print per-core CPU % at regular intervals."""
+    stop_event = threading.Event()
+
+    def _poll():
+        while not stop_event.is_set():
+            percents = psutil.cpu_percent(interval=interval, percpu=True)
+            print("Cores:", [f"{p:5.1f}%" for p in percents])
+
+    t = threading.Thread(target=_poll, daemon=True)
+    t.start()
+    return stop_event   # caller sets stop_event.set() to stop
+
+
+# Usage:
+# stop = monitor_cpu()
+# run_parallel_normalise()
+# stop.set()
+```
+
+If you see only one or two cores active during `ProcessPoolExecutor` work, check that your task
+granularity is large enough to justify the IPC overhead of spawning processes.
+
+### Using `timeit` for micro-benchmarks
+
+```{python}
+#| label: timeit-example
+#| code-summary: "Micro-benchmark with timeit"
+
+import timeit
+
+result = timeit.timeit(
+    stmt="json.loads(raw)",
+    setup='import json; raw = open("data/raw/103293.json").read()',
+    number=1000,
+)
+print(f"Average per call: {result / 1000 * 1e6:.1f} µs")
+```
+
+---
+
+## Practical Development Workflow
+
+1. **Write the naive scraper first.** Confirm the API shape, handle edge cases (empty pages, 404s),
+   and get clean data before optimising.
+2. **Profile before parallelising.** Use `cProfile` or `line_profiler` to find real bottlenecks,
+   not imagined ones.
+3. **Add async.** Switch `requests` → `aiohttp`, wrap the loop in `asyncio.gather`, add a semaphore.
+   Re-measure.
+4. **Add CPU parallelism only if needed.** If processing is trivial (< 5 % of total time), the
+   `ProcessPoolExecutor` overhead is not worth it.
+5. **Tune concurrency empirically.** Try `MAX_CONCURRENT` = 5, 10, 20 and plot wall time vs. value.
+   You will see diminishing returns and, eventually, API-imposed 429 errors.
+
+::: {.callout-tip}
+## Save raw JSON, always
+Before optimising, ensure you are persisting raw API responses to disk. If your parser has a bug or
+the API changes shape, you want to re-run parsing without re-hitting the network.
+:::
+
+---
+
+## Other Languages to Consider for Very Large Scraping Tasks
+
+Python is an excellent default, but for millions of URLs or extremely tight latency budgets, consider:
+
+| Language | Strength | Key libraries |
+|---|---|---|
+| **Go** | Native goroutines make concurrency trivial; compiles to a single binary | `net/http`, `colly`, `chromedp` |
+| **Rust** | Near-C performance, zero-cost async via `tokio`; great for sustained high-throughput pipelines | `reqwest`, `tokio`, `scraper` |
+| **JavaScript / Node.js** | Event-loop is async by default; ideal if the target is a JS-rendered SPA | `axios`, `playwright`, `cheerio` |
+| **Java / Kotlin** | JVM thread pool maturity; good choice in enterprise environments | `OkHttp`, `Ktor`, `jsoup` |
+| **Julia** | Surprisingly fast HTTP; useful when scraping feeds directly into numerical analysis | `HTTP.jl`, `JSON3.jl` |
+
+For most analysts, Python's ecosystem and the speed gains from `aiohttp` + `ProcessPoolExecutor` are
+more than sufficient. Rewriting in Go or Rust becomes worthwhile when you are sustaining > 10 000
+requests/minute over long periods or deploying scraping as a production microservice.
+
+---
+
+## Conclusion
+
+The path from naive to production-grade scraper is incremental:
+
+- A **synchronous scraper** built with `requests` is the right starting point — simple to write, easy to debug.
+- Switching to **async I/O** with `aiohttp` and a semaphore typically delivers a 5–20× speedup for
+  network-bound workloads with minimal code change.
+- **CPU parallelism** via `ProcessPoolExecutor` complements async when post-processing is expensive.
+- **Benchmark every stage** with `time.perf_counter()` and `psutil` so optimisation decisions are
+  data-driven, not guesswork.
+- **Store raw JSON** alongside your processed output to keep the pipeline reproducible.
+
+The two APIs mentioned in this article — VIA Rail's `allData.json` and MaxSold's auction items endpoint
+— are useful real-world targets to practice against because they return structured JSON, have
+predictable shapes, and are publicly accessible.
+
+---
+
+## References & Further Reading
+
+- Van Rossum, G. et al. *asyncio — Asynchronous I/O*. Python 3 documentation.
+  <https://docs.python.org/3/library/asyncio.html>
+
+- aiohttp maintainers. *aiohttp documentation*.
+  <https://docs.aiohttp.org>
+
+- Python Software Foundation. *concurrent.futures — Launching parallel tasks*.
+  <https://docs.python.org/3/library/concurrent.futures.html>
+
+- Giampaolo Rodolà. *psutil documentation*.
+  <https://psutil.readthedocs.io>
+
+- Reitz, K. *Requests: HTTP for Humans*.
+  <https://requests.readthedocs.io>
+
+- pandas contributors. *pandas.json_normalize*.
+  <https://pandas.pydata.org/docs/reference/api/pandas.json_normalize.html>
+
+- Nguyen, T. (2021). *Fast API scraping in Python: asyncio vs threading vs multiprocessing*.
+  Towards Data Science.
+  <https://towardsdatascience.com/fast-api-scraping-in-python-asyncio-vs-threading-vs-multiprocessing>
+
+- Nikitin, A. *colly — Fast and Elegant Scraping Framework for Go*.
+  <https://github.com/gocolly/colly>
+
+- Tokio contributors. *Tokio — An asynchronous Rust runtime*.
+  <https://tokio.rs>
+
+- tenacity contributors. *tenacity — Retrying library for Python*.
+  <https://tenacity.readthedocs.io>
+
+- VIA Rail Canada. *TSI Mobile API — allData.json*.
+  <https://tsimobile.viarail.ca/data/allData.json>
+
+- MaxSold Inc. *Auction Items API*.
+  <https://maxsold.maxsold.com/msapi/auctions/items?auctionid=103293>
