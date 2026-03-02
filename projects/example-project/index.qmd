@@ -1,0 +1,40 @@
+---
+title: "Example Dataset Project"
+description: "An example project page showing how to document a dataset or tool."
+author: "Jonathan Pearce"
+date: "2026-02-01"
+categories: [Dataset, Example]
+image: thumbnail.png
+toc: true
+---
+
+## Overview
+
+This is a placeholder project page. Replace the contents with a description of your actual project or dataset.
+
+## Motivation
+
+Explain why the project exists and what problem it solves.
+
+## Data
+
+Describe the dataset, its source, size, and structure.
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `id`   | int  | Unique identifier |
+| `name` | str  | Record name |
+| `value`| float| Measurement |
+
+## Methodology
+
+Outline the approach, tools, or models used.
+
+## Results
+
+Share key findings, visualisations, or metrics.
+
+## Links
+
+- [GitHub Repo](#) — source code
+- [Download Dataset](#) — CSV / Parquet
