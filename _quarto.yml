@@ -1,0 +1,51 @@
+project:
+  type: website
+  output-dir: _site
+
+website:
+  title: "Casual Inference"
+  description: "Personal website of Jonathan Pearce — projects, blog posts, datasets, and resources on data analytics, machine learning, and statistics."
+  site-url: https://jonathan-pearce.github.io
+
+  navbar:
+    background: dark
+    left:
+      - href: index.qmd
+        text: Home
+      - href: blog/index.qmd
+        text: Blog
+      - href: projects/index.qmd
+        text: Projects
+      - href: resources/index.qmd
+        text: Resources
+      - href: about.qmd
+        text: About
+    right:
+      - icon: github
+        href: https://github.com/Jonathan-Pearce
+        aria-label: GitHub
+      - icon: linkedin
+        href: https://www.linkedin.com/in/jonathan-pearce
+        aria-label: LinkedIn
+
+  page-footer:
+    center: "© 2026 Jonathan Pearce · Built with [Quarto](https://quarto.org)"
+
+  search: true
+
+  open-graph: true
+
+format:
+  html:
+    theme:
+      light: flatly
+      dark: darkly
+    css: custom.css
+    toc: true
+    code-fold: true
+    code-tools: true
+    code-copy: true
+    highlight-style: github
+
+execute:
+  freeze: auto
