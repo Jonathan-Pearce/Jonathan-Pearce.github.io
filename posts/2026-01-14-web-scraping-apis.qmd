@@ -1,0 +1,156 @@
+---
+title: "Web Scraping with APIs: A Modern Approach"
+date: 2026-01-14
+author: "Jonathan Pearce"
+tags: [web scraping, APIs, data collection, tutorial]
+summary: "Learn how to leverage public APIs for efficient web scraping using browser developer tools and design best practices."
+draft: false
+---
+
+## Introduction
+
+Web scraping doesn't always require parsing HTML. Many modern websites expose their data through Application Programming Interfaces (APIs), often returning clean, structured JSON data. By identifying and leveraging these APIs, you can collect data more efficiently and reliably than traditional HTML scraping methods.
+
+This guide demonstrates how to discover hidden APIs using browser developer tools, access public endpoints, and design robust data collection systems.
+
+## Discovering APIs with Browser Developer Tools
+
+The most powerful tool for finding APIs is your browser's built-in Network inspector. Here's how to uncover API endpoints:
+
+### Step 1: Open Developer Tools
+
+In Chrome, Firefox, or Edge, press `F12` or right-click and select "Inspect Element." Navigate to the **Network** tab.
+
+### Step 2: Monitor Network Activity
+
+Reload the page or interact with the website (scroll, click buttons, search). The Network tab will display all HTTP requests the browser makes. Look for:
+
+- **XHR** or **Fetch** requests (these typically fetch data dynamically)
+- Requests returning **JSON** content (check the Response tab)
+- URLs containing terms like `/api/`, `/data/`, or file extensions like `.json`
+
+### Step 3: Examine Request Details
+
+Click on promising requests to view:
+
+- **Request URL**: The complete API endpoint
+- **Request Method**: Usually GET for data retrieval
+- **Query Parameters**: URL parameters that filter or modify results
+- **Response**: The actual data returned, often in JSON format
+
+### Practical Examples
+
+Let's examine two real-world API endpoints:
+
+**Example 1: VIA Rail Train Data**
+```
+https://tsimobile.viarail.ca/data/allData.json
+```
+
+This simple endpoint returns all train schedule data in a single JSON file. No authentication or parameters needed—just a direct GET request returns the complete dataset.
+
+**Example 2: MaxSold Auction Items**
+```
+https://maxsold.maxsold.com/msapi/auctions/items?auctionid=103293
+```
+
+This endpoint demonstrates a parameterized API. The `auctionid` parameter allows you to query specific auction data. By modifying this parameter, you could iterate through multiple auctions.
+
+## Additional Tips for Identifying API Endpoints
+
+### Pattern Recognition
+
+Look for consistent URL patterns:
+- Sequential IDs in URLs (`/items/1`, `/items/2`, etc.)
+- RESTful structures (`/api/v1/users`, `/api/v1/products`)
+- Query string parameters that suggest filtering capabilities
+
+### Check for API Documentation
+
+Search the website for:
+- `/docs`, `/api/docs`, or `/swagger` endpoints
+- Developer or API sections in the footer
+- `robots.txt` or `sitemap.xml` files that might list endpoints
+
+### Inspect Page Source
+
+Right-click and "View Page Source" to find:
+- Hardcoded API URLs in JavaScript
+- Comments containing endpoint information
+- Configuration objects with base URLs
+
+### Use Browser Extensions
+
+Tools like "JSON Formatter" or "REST Client" can help identify and test API endpoints directly in your browser.
+
+## Design Considerations for API-Based Scrapers
+
+### Respecting API Limits
+
+Many APIs implement rate limiting to prevent abuse. Best practices include:
+
+- **Read the Terms of Service**: Ensure your scraping is permitted
+- **Check for Rate Limit Headers**: Look for `X-RateLimit-*` headers in responses
+- **Implement Delays**: Add sleep intervals between requests (e.g., 1-2 seconds)
+- **Use Exponential Backoff**: If you receive 429 (Too Many Requests) errors, wait progressively longer before retrying
+
+### Parallelization for Large Datasets
+
+For extensive data collection, consider:
+
+- **Thread Pools**: Use libraries like Python's `concurrent.futures` to make multiple requests simultaneously
+- **Async/Await**: Leverage asynchronous programming (e.g., `asyncio` in Python) for non-blocking requests
+- **Queue Systems**: For very large jobs, use task queues like Celery or RQ
+- **Monitor Performance**: Balance speed with server load—too many parallel requests can trigger rate limits or bans
+
+### Data Storage Strategies
+
+Choosing how to save your data depends on your use case:
+
+**Save Raw JSON**
+- **Pros**: Preserves all data, flexible for future analysis, maintains original structure
+- **Cons**: Larger file sizes, requires additional processing for analysis
+- **Best for**: Archival purposes, uncertain future needs, preserving metadata
+
+**Convert to Tabular Data**
+- **Pros**: Ready for immediate analysis, smaller file sizes, easy to query with SQL or pandas
+- **Cons**: May lose nested data, requires upfront schema decisions
+- **Best for**: Structured analysis, relational databases, reporting
+
+**Hybrid Approach**
+- Save raw JSON for backup/archiving
+- Extract and store processed data in databases or CSV files for analysis
+- This provides both flexibility and performance
+
+### Error Handling and Logging
+
+Robust scrapers should:
+- Catch and log HTTP errors (404, 500, etc.)
+- Implement retry logic for transient failures
+- Save progress periodically to resume interrupted jobs
+- Log timestamps, URLs accessed, and any anomalies
+
+## Example Implementation Pattern
+
+Here's a conceptual workflow:
+
+1. **Discover** the API endpoint using browser DevTools
+2. **Test** the endpoint manually with curl or a REST client
+3. **Document** required parameters, headers, and rate limits
+4. **Implement** the scraper with appropriate delays and error handling
+5. **Store** raw JSON initially, then process as needed
+6. **Monitor** logs for errors and performance issues
+7. **Maintain** the scraper as APIs evolve or update
+
+## Conclusion
+
+API-based web scraping offers significant advantages over HTML parsing: structured data, stability, and efficiency. By mastering browser developer tools and following thoughtful design practices, you can build reliable data collection systems that respect server resources while meeting your analytical needs.
+
+Remember that while many APIs are public and accessible, always review terms of service and implement responsible scraping practices. The goal is sustainable data collection that benefits your projects without burdening the services you're accessing.
+
+## References
+
+1. Mozilla Developer Network. (2024). *Using the Network Monitor*. Retrieved from https://developer.mozilla.org/en-US/docs/Tools/Network_Monitor
+2. Richardson, L., & Ruby, S. (2007). *RESTful Web Services*. O'Reilly Media.
+3. Chrome DevTools Documentation. (2024). *Network Analysis Reference*. Retrieved from https://developer.chrome.com/docs/devtools/network/
+4. Requests: HTTP for Humans Documentation. (2024). *Advanced Usage*. Retrieved from https://requests.readthedocs.io/
