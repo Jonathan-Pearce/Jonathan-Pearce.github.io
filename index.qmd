@@ -9,9 +9,12 @@ toc: false
 
 # Welcome to Casual Inference
 
-A personal site for sharing projects, blog posts, datasets, and resources on **data analytics**, **machine learning**, and **statistics**.
+Hello! I'm **Jonathan Pearce**. I work in the areas of data analytics, machine learning, and statistics.
+This site is a place to share my projects, blog posts, datasets, and resources.
 
 [GitHub](https://github.com/Jonathan-Pearce){.btn .btn-outline-light .btn-sm}
 [LinkedIn](https://www.linkedin.com/in/jonathan-pearce){.btn .btn-outline-light .btn-sm}
 
 :::
+
+---
