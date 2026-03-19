@@ -3,12 +3,10 @@ title: "Blog Post Template"
 description: "A starter template showing the Quarto features most useful for data analytics and ML blog posts."
 author: "Jonathan Pearce"
 date: "2026-01-01"
-categories: [Template, Tutorial]
 image: thumbnail.png
 draft: true
 toc: true
 code-fold: true
-code-tools: true
 code-copy: true
 number-sections: true
 fig-cap-location: bottom

@@ -5,11 +5,8 @@ listing:
   type: grid
   grid-columns: 2
   sort: "date desc"
-  categories: true
-  sort-ui: true
-  filter-ui: true
   page-size: 12
-  fields: [image, date, title, description, categories]
+  fields: [image, date, title, description]
 ---
 
 A collection of projects, datasets, and tools.

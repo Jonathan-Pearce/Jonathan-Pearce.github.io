@@ -3,11 +3,9 @@ title: "Accelerating Web Scraping with APIs"
 description: "Design patterns and parallelization strategies for Python API scrapers — from a naive loop to async I/O and multi-core execution — plus how to benchmark each step."
 author: "Jonathan Pearce"
 date: "2026-03-02"
-categories: [Python, Web Scraping, Performance, Tutorial]
 image: thumbnail.png
 toc: true
 code-fold: true
-code-tools: true
 code-copy: true
 number-sections: true
 execute:

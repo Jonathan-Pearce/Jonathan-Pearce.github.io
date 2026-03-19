@@ -3,7 +3,6 @@ title: "Example Dataset Project"
 description: "An example project page showing how to document a dataset or tool."
 author: "Jonathan Pearce"
 date: "2026-02-01"
-categories: [Dataset, Example]
 image: thumbnail.png
 toc: true
 ---

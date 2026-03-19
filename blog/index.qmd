@@ -4,15 +4,12 @@ listing:
   contents: posts/*/index.qmd
   type: default
   sort: "date desc"
-  categories: true
-  sort-ui: true
-  filter-ui: true
   feed: true
   page-size: 10
-  fields: [image, date, title, description, categories, reading-time]
+  fields: [image, date, title, description, reading-time]
 ---
 
-Browse posts by category using the sidebar, or search and filter below.
+Browse posts below.
 
 <!--
   FORMATTING RECOMMENDATIONS

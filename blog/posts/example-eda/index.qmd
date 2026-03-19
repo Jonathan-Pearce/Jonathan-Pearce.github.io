@@ -3,7 +3,6 @@ title: "Exploratory Data Analysis with Python"
 description: "A walkthrough of a simple EDA workflow using pandas and matplotlib."
 author: "Jonathan Pearce"
 date: "2026-02-15"
-categories: [Python, EDA, Tutorial]
 image: thumbnail.png
 toc: true
 code-fold: true

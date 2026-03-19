@@ -37,13 +37,10 @@ website:
 
 format:
   html:
-    theme:
-      light: flatly
-      dark: darkly
+    theme: darkly
     css: custom.css
     toc: true
     code-fold: true
-    code-tools: true
     code-copy: true
     highlight-style: github
 
