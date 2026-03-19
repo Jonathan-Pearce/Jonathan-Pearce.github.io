@@ -16,6 +16,17 @@
   padding: 2rem 1rem;
 }
 
+.hero-section .btn-outline-light {
+  color: #f8f9fa;
+  border-color: #f8f9fa;
+  margin: 0.25rem;
+}
+
+.hero-section .btn-outline-light:hover {
+  background-color: #f8f9fa;
+  color: #1a1a2e;
+}
+
 .hero-section img.profile-photo {
   width: 180px;
   height: 180px;
