@@ -1,20 +1,20 @@
 ---
-title: "Casual Inference"
+title: "Jonathan Pearce"
+subtitle: "Data analyst · Machine learning · Statistics"
+about:
+  template: trestles
+  image: images/profile-placeholder.png
+  image-shape: rounded
+  image-width: 20em
+  links:
+    - icon: github
+      text: GitHub
+      href: https://github.com/Jonathan-Pearce
+    - icon: linkedin
+      text: LinkedIn
+      href: https://www.linkedin.com/in/jonathan-pearce
 toc: false
 ---
 
-::: {.hero-section}
-
-![](images/profile-placeholder.png){.profile-photo fig-alt="Photo of Jonathan Pearce"}
-
-# Welcome to Casual Inference
-
-Hello! I'm **Jonathan Pearce**. I work in the areas of data analytics, machine learning, and statistics.
-This site is a place to share my projects, blog posts, datasets, and resources.
-
-[GitHub](https://github.com/Jonathan-Pearce){.btn .btn-outline-light .btn-sm}
-[LinkedIn](https://www.linkedin.com/in/jonathan-pearce){.btn .btn-outline-light .btn-sm}
-
-:::
-
----
+I work in the areas of data analytics, machine learning, and statistics.
+This site is a place to share projects, blog posts, datasets, and resources.

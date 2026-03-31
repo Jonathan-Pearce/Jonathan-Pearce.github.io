@@ -1,52 +1,11 @@
 /*
-  Custom styles for Casual Inference
-  See STYLE_GUIDE.md for instructions on modifying these values.
+  Custom styles for Jonathan Pearce's personal website.
+  The base design is Quarto's default flatly theme with the trestles about template.
+  Add overrides here only as needed.
 */
 
-/* ── Brand colours ─────────────────────────────────────── */
-:root {
-  --ci-primary: #2c3e50;
-  --ci-accent: #18bc9c;
-  --ci-light-bg: #f8f9fa;
-}
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;700&display=swap');
 
-/* ── Landing page hero ─────────────────────────────────── */
-.hero-section {
-  text-align: center;
-  padding: 2rem 1rem;
-}
-
-.hero-section .btn-outline-light {
-  color: #f8f9fa;
-  border-color: #f8f9fa;
-  margin: 0.25rem;
-}
-
-.hero-section .btn-outline-light:hover {
-  background-color: #f8f9fa;
-  color: #1a1a2e;
-}
-
-.hero-section img.profile-photo {
-  width: 180px;
-  height: 180px;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 4px solid var(--ci-accent);
-  margin-bottom: 1rem;
-}
-
-/* ── Listing cards ─────────────────────────────────────── */
-.quarto-listing {
-  margin-top: 1rem;
-}
-
-/* ── Resource category cards ───────────────────────────── */
-.resource-category {
-  margin-bottom: 2rem;
-}
-
-.resource-category h3 {
-  border-bottom: 2px solid var(--ci-accent);
-  padding-bottom: 0.3rem;
+body {
+  font-family: 'Open Sans', sans-serif;
 }

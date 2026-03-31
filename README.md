@@ -1,4 +1,4 @@
-# Casual Inference
+# Jonathan Pearce
 
 Personal website of Jonathan Pearce — projects, blog posts, datasets, and resources on data analytics, machine learning, and statistics.
 

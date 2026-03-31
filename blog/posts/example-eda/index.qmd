@@ -13,7 +13,7 @@ execute:
 
 ## Overview
 
-This example post demonstrates how a typical Exploratory Data Analysis (EDA) blog post looks on *Casual Inference*. It generates synthetic data so the post renders without external dependencies.
+This example post demonstrates how a typical Exploratory Data Analysis (EDA) blog post looks on this site. It generates synthetic data so the post renders without external dependencies.
 
 ## Generate Data
 

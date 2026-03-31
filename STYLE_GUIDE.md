@@ -1,4 +1,4 @@
-# Style Guide — Casual Inference
+# Style Guide — Jonathan Pearce
 
 This document explains how to customise the look-and-feel of the website.
 
@@ -29,9 +29,11 @@ Brand colours are defined as CSS custom properties in `custom.css`:
 
 ```css
 :root {
-  --ci-primary: #2c3e50;   /* dark blue-grey */
-  --ci-accent: #18bc9c;    /* teal accent  */
-  --ci-light-bg: #f8f9fa;  /* light background */
+  --jp-text:    #212529;   /* primary text */
+  --jp-muted:   #6c757d;   /* secondary/muted text */
+  --jp-accent:  #2c7be5;   /* accent / link colour */
+  --jp-border:  #dee2e6;   /* borders */
+  --jp-bg:      #ffffff;   /* page background */
 }
 ```
 
